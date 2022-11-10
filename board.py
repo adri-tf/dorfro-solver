@@ -3,6 +3,7 @@ import logging
 import math as m
 import os
 import sys
+import time
 from typing import List, Optional, NamedTuple, Dict
 
 import matplotlib.pyplot as plt
@@ -67,12 +68,13 @@ class Board:
     def _inv_tr(x, y):
         return x / 0.866, y - x * 0.5  # cos(pi/6) ~= 0.866025...
 
-    def render(self):
+    def render(self, fast_mode: bool = False):
         """Draw the board."""
 
         def _get_midpoint(t_x, t_y):
             return [(t_x[0] + t_y[0]) / 2, (t_x[1] + t_y[1]) / 2]
 
+        t0 = time.time()
         # Determine aspect ratio
         x_min, x_max, y_min, y_max = 0, 0, 0, 0
         for tile in self._database.get_tiles():
@@ -95,6 +97,12 @@ class Board:
                              [x + s * m.cos(-m.pi * 2 / 3), y + s * m.sin(-m.pi * 2 / 3)],
                              [x + s * m.cos(-m.pi / 3), y + s * m.sin(-m.pi / 3)], [x + s, y]]
 
+            if fast_mode and len([t for t in tile.get_neighbors() if t and t.state == Tile.State.FULL]) == 6:
+                if tile.state != Tile.State.EMPTY:
+                    xs, ys = zip(*hexagon_coord)
+                    plt.fill(xs, ys, color='gray')
+                    continue
+
             # For each side of the hexagon
             for i in range(6):
                 m1 = _get_midpoint(hexagon_coord[0 + i], [x, y])
@@ -110,7 +118,8 @@ class Board:
 
         plt.savefig(os.path.join(os.path.dirname(sys.argv[0]), 'board.png'))
         plt.close()
-        logger.info("Board rendered.")
+        t1 = time.time()
+        logger.info(f"Board rendered | Time: {(t1 - t0):.2f}s.")
 
     def place_tile(self, new_tile: Tile, show: bool = True) -> Tile:
         """Add a tile to the board if allowed.

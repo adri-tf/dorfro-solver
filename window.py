@@ -20,7 +20,7 @@ class Window:
 
         self.win = Tk()
         self.win.configure(bg='antique white')
-        self.win.geometry('300x320')
+        self.win.geometry('300x360')
 
         # Frame 1 (top left): input
         frame1 = Frame(self.win, bd=1, relief=SOLID, padx=5, pady=5)
@@ -55,16 +55,17 @@ class Window:
 
         # Frame 2 (bottom): commands
         frame2 = Frame(self.win, bd=1, relief=SOLID, padx=5, pady=5)
-        frame2.place_configure(x=0, y=200, width=300, height=120)
+        frame2.place_configure(x=0, y=200, width=300, height=160)
 
         Button(frame2, text='Help Me!', command=self._help_me).grid(column=1, row=9, padx=10, pady=5)
         Button(frame2, text='Place Tile', command=self._place_tile).grid(column=1, row=10, padx=10, pady=5)
         Button(frame2, text='Undo Move', command=self._board.undo).grid(column=1, row=11, padx=10, pady=5)
-        Button(frame2, text='Find candidate', command=self._find_candidate).grid(column=2, row=9, padx=10, pady=5)
-        Button(frame2, text='Best Match', command=self._place_best_match).grid(column=2, row=10, padx=10, pady=5)
-        Button(frame2, text='Best Value', command=self._place_best_value).grid(column=2, row=11, padx=10, pady=5)
-        Button(frame2, text='Find tile', command=self._find_tile).grid(column=3, row=9, padx=10, pady=5)
-        Button(frame2, text='Render', command=self._board.render).grid(column=3, row=10, padx=10, pady=5)
+        Button(frame2, text='Best Match', command=self._place_best_match).grid(column=2, row=9, padx=10, pady=5)
+        Button(frame2, text='Best Value', command=self._place_best_value).grid(column=2, row=10, padx=10, pady=5)
+        Button(frame2, text='Find candidate', command=self._find_candidate).grid(column=2, row=11, padx=10, pady=5)
+        Button(frame2, text='Find tile', command=self._find_tile).grid(column=2, row=12, padx=10, pady=5)
+        Button(frame2, text='Fast Render', command=self._render_fast).grid(column=3, row=9, padx=10, pady=5)
+        Button(frame2, text='Render', command=self._board.render).grid(column=3, row=10, padx=9, pady=5)
         Button(frame2, text='Save', command=self._board.save_data).grid(column=3, row=11, padx=10, pady=5)
 
         # Frame 3 (top right): hexagon
@@ -246,6 +247,9 @@ class Window:
             self._rotations = 0
         self._best_match = None
         self._best_value = None
+
+    def _render_fast(self):
+        self._board.render(fast_mode=True)
 
     def _save_exit(self):
         self._board.save_data()
