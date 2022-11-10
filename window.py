@@ -224,7 +224,7 @@ class Window:
 
         for i in range(6):
             points = hexagon_coord[i] + hexagon_coord[i + 1] + [x] + [y]
-            self.canvas.create_polygon(points, fill=COLOR_MAPPING[int(getattr(self, 'e' + str(i)).get())])
+            self.canvas.create_polygon(points, fill=COLOR_MAPPING[Tile.Edge(int(getattr(self, 'e' + str(i)).get()))])
 
     def _rotate_left(self):
         if self._validate_edges():

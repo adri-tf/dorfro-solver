@@ -128,7 +128,7 @@ class Board:
         if new_tile.Edge.EMPTY in new_tile.get_edges():
             raise Exception(f"Cannot add tile {new_tile.get_pos()}: edge given is empty")
 
-        # For each neighbor, verify if the common edge matches
+        # Add eventual new slots and verify if edge matches
         for i in range(6):
             n_coord = new_tile.x + NEIGHBORS_COORD[i]["x"], new_tile.y + NEIGHBORS_COORD[i]["y"]
             n_tile = self._database.get_tile(*n_coord)
@@ -144,6 +144,14 @@ class Board:
         self.last_placement = new_tile
         if show:
             logger.info(f"Tile {new_tile.get_pos()} placed")
+            # Verify if neighbors are closed slots with no candidates seen before
+            for n in [tile for tile in db_tile.get_neighbors() if tile.state == Tile.State.EMPTY]:
+                if len([t for t in n.get_neighbors() if t is not None and t.state == Tile.State.FULL]) == 6:
+                    n_c = self.find_candidate([getattr(n.get_neighbors()[j], 'e' + str((j + 3) % 6)) for j in range(6)])
+                    if not n_c:
+                        logger.warning(f"Warning: {n.get_pos()} closed but candidates found")
+                    else:
+                        logger.info(f"{n.get_pos()} closed, {len(n_c)} candidates found")
         return db_tile
 
     def undo(self):

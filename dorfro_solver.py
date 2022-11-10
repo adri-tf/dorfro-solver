@@ -17,6 +17,5 @@ def main():
 if __name__ == '__main__':
     main()
 
-# Add a warning if you close a slot and the ideal candidate has not been seen
 # Fast render option
 # For 5/6 matches, consider exclusive edge matches
