@@ -1,114 +1,188 @@
-"""Window class."""
+"""Window"""
 import logging
 import math as m
-from tkinter import Label, Entry, Button, Tk, SOLID, Frame, Canvas
+import os.path
 from typing import Optional
 
+from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QMainWindow
+
 from board import Board, COLOR_MAPPING
-from database import Tile
+from tile import Tile
 
 logger = logging.getLogger("root")
 
 
-class Window:
-    """UI."""
+class Window(QMainWindow):
+    """Window."""
 
     def __init__(self, board: Board):
+        super().__init__()
+
+        # Window settings
+        self.setWindowTitle("Dorfro-solver")
+        self.setWindowIcon(QtGui.QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.jpg")))
+        self._width, self._height = 300, 360
+        self.setFixedSize(self._width, self._height)
+        self.setGeometry(int((1920 - self._width) / 2), 30, self._width, self._height)
+
+        # Variables
         self._board: Board = board
+        self._rotations = 0
         self._best_match: Optional[Tile] = None
         self._best_value: Optional[Tile] = None
 
-        self.win = Tk()
-        self.win.configure(bg='antique white')
-        self.win.geometry('300x360')
+        # Inputs
+        self._inputWidget = QtWidgets.QWidget(self)
+        self._inputWidget.setGeometry(0, 0, 150, 200)
+        self._inputForm = QtWidgets.QFormLayout(self._inputWidget)
+        self._inputForm.setContentsMargins(5, 5, 5, 5)
 
-        # Frame 1 (top left): input
-        frame1 = Frame(self.win, bd=1, relief=SOLID, padx=5, pady=5)
-        frame1.place_configure(x=0, y=0, width=150, height=200)
+        self._xLabel, self._x = QtWidgets.QLabel("X", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
+        self._yLabel, self._y = QtWidgets.QLabel("Y", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
+        self._e0Label, self._e0 = QtWidgets.QLabel("1", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
+        self._e1Label, self._e1 = QtWidgets.QLabel("2", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
+        self._e2Label, self._e2 = QtWidgets.QLabel("3", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
+        self._e3Label, self._e3 = QtWidgets.QLabel("4", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
+        self._e4Label, self._e4 = QtWidgets.QLabel("5", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
+        self._e5Label, self._e5 = QtWidgets.QLabel("6", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
 
-        self.x = Entry(frame1, width=15)
-        self.y = Entry(frame1, width=15)
-        self.e0 = Entry(frame1, width=15)
-        self.e1 = Entry(frame1, width=15)
-        self.e2 = Entry(frame1, width=15)
-        self.e3 = Entry(frame1, width=15)
-        self.e4 = Entry(frame1, width=15)
-        self.e5 = Entry(frame1, width=15)
+        self._inputForm.setWidget(0, QtWidgets.QFormLayout.LabelRole, self._xLabel)
+        self._inputForm.setWidget(0, QtWidgets.QFormLayout.FieldRole, self._x)
+        self._inputForm.setWidget(1, QtWidgets.QFormLayout.LabelRole, self._yLabel)
+        self._inputForm.setWidget(1, QtWidgets.QFormLayout.FieldRole, self._y)
+        self._inputForm.setWidget(2, QtWidgets.QFormLayout.LabelRole, self._e0Label)
+        self._inputForm.setWidget(2, QtWidgets.QFormLayout.FieldRole, self._e0)
+        self._inputForm.setWidget(3, QtWidgets.QFormLayout.LabelRole, self._e1Label)
+        self._inputForm.setWidget(3, QtWidgets.QFormLayout.FieldRole, self._e1)
+        self._inputForm.setWidget(4, QtWidgets.QFormLayout.LabelRole, self._e2Label)
+        self._inputForm.setWidget(4, QtWidgets.QFormLayout.FieldRole, self._e2)
+        self._inputForm.setWidget(5, QtWidgets.QFormLayout.LabelRole, self._e3Label)
+        self._inputForm.setWidget(5, QtWidgets.QFormLayout.FieldRole, self._e3)
+        self._inputForm.setWidget(6, QtWidgets.QFormLayout.LabelRole, self._e4Label)
+        self._inputForm.setWidget(6, QtWidgets.QFormLayout.FieldRole, self._e4)
+        self._inputForm.setWidget(7, QtWidgets.QFormLayout.LabelRole, self._e5Label)
+        self._inputForm.setWidget(7, QtWidgets.QFormLayout.FieldRole, self._e5)
 
-        Label(frame1, text="X:").grid(row=0)
-        Label(frame1, text="Y:").grid(row=1)
-        Label(frame1, text='1:').grid(row=2)
-        Label(frame1, text='2:').grid(row=3)
-        Label(frame1, text='3:').grid(row=4)
-        Label(frame1, text='4:').grid(row=5)
-        Label(frame1, text='5:').grid(row=6)
-        Label(frame1, text='6:').grid(row=7)
+        # Buttons
+        self._buttonsWidget = QtWidgets.QWidget(self)
+        self._buttonsWidget.setGeometry(0, 200, 300, 160)
+        self._gridLayout = QtWidgets.QGridLayout(self._buttonsWidget)
+        self._gridLayout.setContentsMargins(5, 5, 5, 5)
 
-        self.x.grid(row=0, column=1)
-        self.y.grid(row=1, column=1)
-        self.e0.grid(row=2, column=1)
-        self.e1.grid(row=3, column=1)
-        self.e2.grid(row=4, column=1)
-        self.e3.grid(row=5, column=1)
-        self.e4.grid(row=6, column=1)
-        self.e5.grid(row=7, column=1)
+        self._pushButton0 = QtWidgets.QPushButton("Help Me!", self._buttonsWidget)
+        self._pushButton1 = QtWidgets.QPushButton("Place Tile!", self._buttonsWidget)
+        self._pushButton2 = QtWidgets.QPushButton("Undo", self._buttonsWidget)
+        self._pushButton3 = QtWidgets.QPushButton("Best Match", self._buttonsWidget)
+        self._pushButton4 = QtWidgets.QPushButton("Best Value", self._buttonsWidget)
+        self._pushButton5 = QtWidgets.QPushButton("Find candidate", self._buttonsWidget)
+        self._pushButton6 = QtWidgets.QPushButton("Find tile", self._buttonsWidget)
+        self._pushButton7 = QtWidgets.QPushButton("Fast Render", self._buttonsWidget)
+        self._pushButton8 = QtWidgets.QPushButton("Full Render", self._buttonsWidget)
+        self._pushButton9 = QtWidgets.QPushButton("Save", self._buttonsWidget)
 
-        # Frame 2 (bottom): commands
-        frame2 = Frame(self.win, bd=1, relief=SOLID, padx=5, pady=5)
-        frame2.place_configure(x=0, y=200, width=300, height=160)
+        self._pushButton0.clicked.connect(self._help_me)
+        self._pushButton1.clicked.connect(self._place_tile)
+        self._pushButton2.clicked.connect(self._board.undo)
+        self._pushButton3.clicked.connect(self._place_best_match)
+        self._pushButton4.clicked.connect(self._place_best_value)
+        self._pushButton5.clicked.connect(self._find_candidate)
+        self._pushButton6.clicked.connect(self._find_tile)
+        self._pushButton7.clicked.connect(self._render_fast)
+        self._pushButton8.clicked.connect(self._board.render)
+        self._pushButton9.clicked.connect(self._board.save_data)
 
-        Button(frame2, text='Help Me!', command=self._help_me).grid(column=1, row=9, padx=10, pady=5)
-        Button(frame2, text='Place Tile', command=self._place_tile).grid(column=1, row=10, padx=10, pady=5)
-        Button(frame2, text='Undo Move', command=self._board.undo).grid(column=1, row=11, padx=10, pady=5)
-        Button(frame2, text='Best Match', command=self._place_best_match).grid(column=2, row=9, padx=10, pady=5)
-        Button(frame2, text='Best Value', command=self._place_best_value).grid(column=2, row=10, padx=10, pady=5)
-        Button(frame2, text='Find candidate', command=self._find_candidate).grid(column=2, row=11, padx=10, pady=5)
-        Button(frame2, text='Find tile', command=self._find_tile).grid(column=2, row=12, padx=10, pady=5)
-        Button(frame2, text='Fast Render', command=self._render_fast).grid(column=3, row=9, padx=10, pady=5)
-        Button(frame2, text='Render', command=self._board.render).grid(column=3, row=10, padx=9, pady=5)
-        Button(frame2, text='Save', command=self._board.save_data).grid(column=3, row=11, padx=10, pady=5)
+        self._gridLayout.addWidget(self._pushButton0, 0, 0, 1, 1)
+        self._gridLayout.addWidget(self._pushButton1, 1, 0, 1, 1)
+        self._gridLayout.addWidget(self._pushButton2, 2, 0, 1, 1)
+        self._gridLayout.addWidget(self._pushButton3, 0, 1, 1, 1)
+        self._gridLayout.addWidget(self._pushButton4, 1, 1, 1, 1)
+        self._gridLayout.addWidget(self._pushButton5, 2, 1, 1, 1)
+        self._gridLayout.addWidget(self._pushButton6, 3, 1, 1, 1)
+        self._gridLayout.addWidget(self._pushButton7, 0, 2, 1, 1)
+        self._gridLayout.addWidget(self._pushButton8, 1, 2, 1, 1)
+        self._gridLayout.addWidget(self._pushButton9, 2, 2, 1, 1)
 
-        # Frame 3 (top right): hexagon
-        frame3 = Frame(self.win, bd=1, relief=SOLID)
-        frame3.place_configure(x=150, y=0, width=150, height=160)
+        # Rotation buttons
+        self.tileWidget = QtWidgets.QWidget(self)
+        self.tileWidget.setGeometry(150, 150, 150, 50)
+        self.gridLayout = QtWidgets.QGridLayout(self.tileWidget)
+        self.gridLayout.setContentsMargins(5, 5, 5, 5)
 
-        self.canvas = Canvas(frame3)
-        self.canvas.pack()
+        self.pushButtonL = QtWidgets.QPushButton(self.tileWidget)
+        self.pushButtonR = QtWidgets.QPushButton(self.tileWidget)
+        self.pushButtonL.setText("↻")
+        self.pushButtonR.setText("↺")
+        self.pushButtonL.clicked.connect(self._rotate_left)
+        self.pushButtonR.clicked.connect(self._rotate_right)
+        self.gridLayout.addWidget(self.pushButtonL, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.pushButtonR, 0, 1, 1, 1)
 
-        # Frame 4 (below frame 3): < and > to rotate
-        frame4 = Frame(self.win, bd=1, relief=SOLID)
-        frame4.place_configure(x=150, y=160, width=150, height=40)
+    def paintEvent(self, event):
+        """Overriden function called automatically when initiating the widget and using repaint()."""
+        x = 225
+        y = 75
+        w = 60
+        hexagon_coord = [[x + w, y], [x + w * m.cos(-m.pi / 3), y + w * m.sin(-m.pi / 3)],
+                         [x + w * m.cos(-m.pi * 2 / 3), y + w * m.sin(-m.pi * 2 / 3)], [x - w, y],
+                         [x + w * m.cos(m.pi * 2 / 3), y + w * m.sin(m.pi * 2 / 3)],
+                         [x + w * m.cos(m.pi / 3), y + w * m.sin(m.pi / 3)], [x + w, y]]
 
-        Button(frame4, text='<', command=self._rotate_right).grid(column=1, row=1, padx=25, pady=5)
-        Button(frame4, text='>', command=self._rotate_left).grid(column=2, row=1, padx=25, pady=5)
+        painter = QtGui.QPainter(self)
+        painter.setPen(QtGui.QPen(Qt.white, 2, Qt.SolidLine))
+        if self._validate_edges(logs=False):
+            for i in range(6):
+                painter.setBrush(
+                    QtGui.QBrush(QColor(COLOR_MAPPING[Tile.Edge(int(getattr(self, '_e' + str(i)).text()))]),
+                                 Qt.SolidPattern))
+                polygon = QtGui.QPolygon([
+                    QtCore.QPoint(x, y),
+                    QtCore.QPoint(int(hexagon_coord[i][0]), int(hexagon_coord[i][1])),
+                    QtCore.QPoint(int(hexagon_coord[i + 1][0]), int(hexagon_coord[i + 1][1])),
+                ])
 
-        self._rotations: int = 0
+                painter.drawPolygon(polygon)
+                painter.drawPolygon(polygon)
+        else:
+            for i in range(6):
+                painter.setBrush(QtGui.QBrush(Qt.white, Qt.SolidPattern))
 
-        self.win.mainloop()
+                polygon = QtGui.QPolygon([
+                    QtCore.QPoint(x, y),
+                    QtCore.QPoint(int(hexagon_coord[i][0]), int(hexagon_coord[i][1])),
+                    QtCore.QPoint(int(hexagon_coord[i + 1][0]), int(hexagon_coord[i + 1][1])),
+                ])
+
+                painter.drawPolygon(polygon)
+                painter.drawPolygon(polygon)
 
     def _validate_coord(self) -> bool:
         """Verify if the X and Y coordinates are valid."""
         try:
-            int(self.x.get())
+            int(self._x.text())
         except ValueError:
             logger.warning("X must be an integer")
             return False
         try:
-            int(self.y.get())
+            int(self._y.text())
         except ValueError:
             logger.warning("Y must be an integer")
             return False
         return True
 
-    def _validate_edges(self) -> bool:
+    def _validate_edges(self, logs: bool = True) -> bool:
         """Verify if all 6 edges are valid."""
         error = False
         for i_edge in range(6):
             try:
-                Tile.Edge(int(getattr(self, 'e' + str(i_edge)).get()))
+                Tile.Edge(int(getattr(self, '_e' + str(i_edge)).text()))
             except ValueError:
                 error = True
-                logger.warning(f"Edge {i_edge + 1}: '{getattr(self, 'e' + str(i_edge)).get()}' is not a valid edge")
+                if logs:
+                    logger.warning(
+                        f"Edge {i_edge + 1}: '{getattr(self, '_e' + str(i_edge)).text()}' is not a valid edge")
         if error:
             return False
         return True
@@ -117,21 +191,21 @@ class Window:
         self._reset_preview()
         if not self._validate_edges():
             return
-        self._draw_hexagon()
+        self.repaint()
 
         # Logging
         logger.info("------------")
 
         # Check if tile was seen before
         tile_occ = self._board.find_tile(
-            [Tile.Edge(int(edge.get())) for edge in [self.e0, self.e1, self.e2, self.e3, self.e4, self.e5]]
+            [Tile.Edge(int(edge.text())) for edge in [self._e0, self._e1, self._e2, self._e3, self._e4, self._e5]]
         )
         if not tile_occ:
             logger.info("New tile")
 
         # Displaying best values for each matches
         matches, five_of_six_matches = self._board.help_me(
-            [Tile.Edge(int(edge.get())) for edge in [self.e0, self.e1, self.e2, self.e3, self.e4, self.e5]]
+            [Tile.Edge(int(edge.text())) for edge in [self._e0, self._e1, self._e2, self._e3, self._e4, self._e5]]
         )
         if not matches:
             logger.info("Bruh")
@@ -167,8 +241,8 @@ class Window:
 
     def _place_tile(self):
         if self._validate_coord() and self._validate_edges():
-            self._board.place_tile(Tile(int(self.x.get()), int(self.y.get()), [
-                Tile.Edge(int(edge.get())) for edge in [self.e0, self.e1, self.e2, self.e3, self.e4, self.e5]
+            self._board.place_tile(Tile(int(self._x.text()), int(self._y.text()), [
+                Tile.Edge(int(edge.text())) for edge in [self._e0, self._e1, self._e2, self._e3, self._e4, self._e5]
             ]))
             self._reset_preview()
 
@@ -191,58 +265,45 @@ class Window:
     def _find_candidate(self):
         if self._validate_edges():
             matches = self._board.find_candidate(
-                [Tile.Edge(int(edge.get())) for edge in [self.e0, self.e1, self.e2, self.e3, self.e4, self.e5]])
+                [Tile.Edge(int(edge.text())) for edge in [self._e0, self._e1, self._e2, self._e3, self._e4, self._e5]])
             if not matches:
                 logger.info("Candidate not found in database.")
             elif len(matches) < 11:
                 logger.info(f"Candidate found: {matches}.")
             else:
                 logger.info(f"Candidate found: {len(matches)} matches.")
-            self._draw_hexagon()
+            self.update()
 
     def _find_tile(self):
         if self._validate_edges():
             matches = self._board.find_tile(
-                [Tile.Edge(int(edge.get())) for edge in [self.e0, self.e1, self.e2, self.e3, self.e4, self.e5]])
+                [Tile.Edge(int(edge.text())) for edge in [self._e0, self._e1, self._e2, self._e3, self._e4, self._e5]])
             if not matches:
                 logger.info("Tile not found in database.")
             elif len(matches) < 11:
                 logger.info(f"Tile found: {matches}.")
             else:
                 logger.info(f"Tile found: {len(matches)} matches.")
-            self._draw_hexagon()
-
-    def _draw_hexagon(self):
-        x = 75
-        y = 80
-        w = 60
-
-        # Y-axis is flipped
-        hexagon_coord = [[x + w, y], [x + w * m.cos(-m.pi / 3), y + w * m.sin(-m.pi / 3)],
-                         [x + w * m.cos(-m.pi * 2 / 3), y + w * m.sin(-m.pi * 2 / 3)], [x - w, y],
-                         [x + w * m.cos(m.pi * 2 / 3), y + w * m.sin(m.pi * 2 / 3)],
-                         [x + w * m.cos(m.pi / 3), y + w * m.sin(m.pi / 3)], [x + w, y]]
-
-        for i in range(6):
-            points = hexagon_coord[i] + hexagon_coord[i + 1] + [x] + [y]
-            self.canvas.create_polygon(points, fill=COLOR_MAPPING[Tile.Edge(int(getattr(self, 'e' + str(i)).get()))])
+            self.update()
 
     def _rotate_left(self):
         if self._validate_edges():
             self._rotations += 1
-            self.e0, self.e1, self.e2, self.e3, self.e4, self.e5 = self.e1, self.e2, self.e3, self.e4, self.e5, self.e0
-            self._draw_hexagon()
+            (self._e0, self._e1, self._e2, self._e3, self._e4, self._e5) = (
+                self._e1, self._e2, self._e3, self._e4, self._e5, self._e0)
+            self.update()
 
     def _rotate_right(self):
         if self._validate_edges():
             self._rotations -= 1
-            self.e0, self.e1, self.e2, self.e3, self.e4, self.e5 = self.e5, self.e0, self.e1, self.e2, self.e3, self.e4
-            self._draw_hexagon()
+            (self._e0, self._e1, self._e2, self._e3, self._e4, self._e5) = (
+                self._e5, self._e0, self._e1, self._e2, self._e3, self._e4)
+            self.update()
 
     def _reset_preview(self):
         if self._rotations != 0:
-            self.e0, self.e1, self.e2, self.e3, self.e4, self.e5 = [
-                getattr(self, 'e' + str((i - self._rotations) % 6)) for i in range(6)
+            self._e0, self._e1, self._e2, self._e3, self._e4, self._e5 = [
+                getattr(self, '_e' + str((i - self._rotations) % 6)) for i in range(6)
             ]
             self._rotations = 0
         self._best_match = None
@@ -250,7 +311,3 @@ class Window:
 
     def _render_fast(self):
         self._board.render(fast_mode=True)
-
-    def _save_exit(self):
-        self._board.save_data()
-        self.win.quit()

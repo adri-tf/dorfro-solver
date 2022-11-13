@@ -172,7 +172,7 @@ class Board:
         self._database.remove_tile(x, y)
         self._database.add_tile(Tile(x, y))
         self.last_placement = None
-        logger.info(f"Last tile ({x, y}) removed from database")
+        logger.info(f"Last tile ({x, y}) removed from board")
 
     def save_data(self):
         """Save all tiles in a file."""
