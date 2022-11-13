@@ -194,7 +194,7 @@ class Window(QMainWindow):
         self.repaint()
 
         # Logging
-        logger.info("------------")
+        logger.info("# " * 60)
 
         # Check if tile was seen before
         tile_occ = self._board.find_tile(
@@ -211,18 +211,46 @@ class Window(QMainWindow):
             logger.info("Bruh")
             return None, None
 
+        result_table, neighbors_num = [], []
         matches.sort(key=lambda t: (-t.value, t.distance))  # sort by value (descending) then distance
-        for neighbors_num in range(1, 7):
-            sub_list = [tmp_tile for tmp_tile in matches if tmp_tile.n_neighbors == neighbors_num]
+        for n_m in range(7, 1, -1):
+            sub_list = [tmp_tile for tmp_tile in matches if tmp_tile.n_neighbors == n_m]
             if not sub_list:
                 continue
-            if len(sub_list) > 10:
-                info = [f"V:{temp_tile.value} E:{temp_tile.distance} {temp_tile.tile.get_pos()}"
-                        for temp_tile in sub_list[:10]]
+            neighbors_num.append(n_m)
+            if len(sub_list) > 15:
+                result_table.append(
+                    [
+                        f"V:{temp_tile.value} E:{temp_tile.distance} {temp_tile.tile.get_pos()}"
+                        for temp_tile in sub_list[:15]
+                    ]
+                )
             else:
-                info = [f"V:{temp_tile.value} E:{temp_tile.distance} {temp_tile.tile.get_pos()}"
-                        for temp_tile in sub_list]
-            logger.info("%s %s", neighbors_num, info)
+                result_table.append(
+                    [f"V:{temp_tile.value} E:{temp_tile.distance} {temp_tile.tile.get_pos()}" for temp_tile in sub_list]
+                )
+
+        # Create empty slots for a proper table
+        results_length = max(len(l_match) for l_match in result_table)
+        for line in result_table:
+            line += [''] * (results_length - len(line))
+
+        # Transpose the table
+        result_table = [
+            [result_table[j][i] for j in range(len(result_table))] for i in range(len(result_table[0]) - 1, -1, -1)
+        ]
+        for line in result_table:
+            display = "|"
+            for match in line:
+                if not match:
+                    display += "\t|"
+                else:
+                    display += "  " + match + "\t|"
+            logger.info(repr(display.expandtabs(30))[1:-1])
+        values = "-"
+        for n in neighbors_num:
+            values += " - - - - - - -" + str(n) + "- - - - - - - -"
+        logger.info(values)
 
         # Retrieving candidate with best value
         if len(matches) == 1 or matches[0].value != matches[1].value:
