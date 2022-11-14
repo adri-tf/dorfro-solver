@@ -24,8 +24,9 @@ class Window(QMainWindow):
         # Window settings
         self.setWindowTitle("Dorfro-solver")
         self.setWindowIcon(QtGui.QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.jpg")))
-        self._width, self._height = 300, 360
-        self.setFixedSize(self._width, self._height)
+        self._width, self._height = 960, 360
+        self.setMinimumSize(self._width - 300, self._height)
+        self.setMaximumSize(self._width, self._height)
         self.setGeometry(int((1920 - self._width) / 2), 30, self._width, self._height)
 
         # Variables
@@ -35,90 +36,107 @@ class Window(QMainWindow):
         self._best_value: Optional[Tile] = None
 
         # Inputs
-        self._inputWidget = QtWidgets.QWidget(self)
-        self._inputWidget.setGeometry(0, 0, 150, 200)
-        self._inputForm = QtWidgets.QFormLayout(self._inputWidget)
-        self._inputForm.setContentsMargins(5, 5, 5, 5)
+        input_widget = QtWidgets.QWidget(self)
+        input_widget.setGeometry(0, 0, 150, 200)
+        input_form = QtWidgets.QFormLayout(input_widget)
+        input_form.setContentsMargins(5, 5, 5, 5)
 
-        self._xLabel, self._x = QtWidgets.QLabel("X", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
-        self._yLabel, self._y = QtWidgets.QLabel("Y", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
-        self._e0Label, self._e0 = QtWidgets.QLabel("1", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
-        self._e1Label, self._e1 = QtWidgets.QLabel("2", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
-        self._e2Label, self._e2 = QtWidgets.QLabel("3", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
-        self._e3Label, self._e3 = QtWidgets.QLabel("4", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
-        self._e4Label, self._e4 = QtWidgets.QLabel("5", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
-        self._e5Label, self._e5 = QtWidgets.QLabel("6", self._inputWidget), QtWidgets.QLineEdit(self._inputWidget)
+        x_label, self._x = QtWidgets.QLabel("X", input_widget), QtWidgets.QLineEdit(input_widget)
+        y_label, self._y = QtWidgets.QLabel("Y", input_widget), QtWidgets.QLineEdit(input_widget)
+        e0_label, self._e0 = QtWidgets.QLabel("1", input_widget), QtWidgets.QLineEdit(input_widget)
+        e1_label, self._e1 = QtWidgets.QLabel("2", input_widget), QtWidgets.QLineEdit(input_widget)
+        e2_label, self._e2 = QtWidgets.QLabel("3", input_widget), QtWidgets.QLineEdit(input_widget)
+        e3_label, self._e3 = QtWidgets.QLabel("4", input_widget), QtWidgets.QLineEdit(input_widget)
+        e4_label, self._e4 = QtWidgets.QLabel("5", input_widget), QtWidgets.QLineEdit(input_widget)
+        e5_label, self._e5 = QtWidgets.QLabel("6", input_widget), QtWidgets.QLineEdit(input_widget)
 
-        self._inputForm.setWidget(0, QtWidgets.QFormLayout.LabelRole, self._xLabel)
-        self._inputForm.setWidget(0, QtWidgets.QFormLayout.FieldRole, self._x)
-        self._inputForm.setWidget(1, QtWidgets.QFormLayout.LabelRole, self._yLabel)
-        self._inputForm.setWidget(1, QtWidgets.QFormLayout.FieldRole, self._y)
-        self._inputForm.setWidget(2, QtWidgets.QFormLayout.LabelRole, self._e0Label)
-        self._inputForm.setWidget(2, QtWidgets.QFormLayout.FieldRole, self._e0)
-        self._inputForm.setWidget(3, QtWidgets.QFormLayout.LabelRole, self._e1Label)
-        self._inputForm.setWidget(3, QtWidgets.QFormLayout.FieldRole, self._e1)
-        self._inputForm.setWidget(4, QtWidgets.QFormLayout.LabelRole, self._e2Label)
-        self._inputForm.setWidget(4, QtWidgets.QFormLayout.FieldRole, self._e2)
-        self._inputForm.setWidget(5, QtWidgets.QFormLayout.LabelRole, self._e3Label)
-        self._inputForm.setWidget(5, QtWidgets.QFormLayout.FieldRole, self._e3)
-        self._inputForm.setWidget(6, QtWidgets.QFormLayout.LabelRole, self._e4Label)
-        self._inputForm.setWidget(6, QtWidgets.QFormLayout.FieldRole, self._e4)
-        self._inputForm.setWidget(7, QtWidgets.QFormLayout.LabelRole, self._e5Label)
-        self._inputForm.setWidget(7, QtWidgets.QFormLayout.FieldRole, self._e5)
+        input_form.setWidget(0, QtWidgets.QFormLayout.LabelRole, x_label)
+        input_form.setWidget(0, QtWidgets.QFormLayout.FieldRole, self._x)
+        input_form.setWidget(1, QtWidgets.QFormLayout.LabelRole, y_label)
+        input_form.setWidget(1, QtWidgets.QFormLayout.FieldRole, self._y)
+        input_form.setWidget(2, QtWidgets.QFormLayout.LabelRole, e0_label)
+        input_form.setWidget(2, QtWidgets.QFormLayout.FieldRole, self._e0)
+        input_form.setWidget(3, QtWidgets.QFormLayout.LabelRole, e1_label)
+        input_form.setWidget(3, QtWidgets.QFormLayout.FieldRole, self._e1)
+        input_form.setWidget(4, QtWidgets.QFormLayout.LabelRole, e2_label)
+        input_form.setWidget(4, QtWidgets.QFormLayout.FieldRole, self._e2)
+        input_form.setWidget(5, QtWidgets.QFormLayout.LabelRole, e3_label)
+        input_form.setWidget(5, QtWidgets.QFormLayout.FieldRole, self._e3)
+        input_form.setWidget(6, QtWidgets.QFormLayout.LabelRole, e4_label)
+        input_form.setWidget(6, QtWidgets.QFormLayout.FieldRole, self._e4)
+        input_form.setWidget(7, QtWidgets.QFormLayout.LabelRole, e5_label)
+        input_form.setWidget(7, QtWidgets.QFormLayout.FieldRole, self._e5)
 
         # Buttons
-        self._buttonsWidget = QtWidgets.QWidget(self)
-        self._buttonsWidget.setGeometry(0, 200, 300, 160)
-        self._gridLayout = QtWidgets.QGridLayout(self._buttonsWidget)
-        self._gridLayout.setContentsMargins(5, 5, 5, 5)
+        buttons_widget = QtWidgets.QWidget(self)
+        buttons_widget.setGeometry(0, 200, 300, 160)
+        grid_layout = QtWidgets.QGridLayout(buttons_widget)
+        grid_layout.setContentsMargins(5, 5, 5, 5)
 
-        self._pushButton0 = QtWidgets.QPushButton("Help Me!", self._buttonsWidget)
-        self._pushButton1 = QtWidgets.QPushButton("Place Tile!", self._buttonsWidget)
-        self._pushButton2 = QtWidgets.QPushButton("Undo", self._buttonsWidget)
-        self._pushButton3 = QtWidgets.QPushButton("Best Match", self._buttonsWidget)
-        self._pushButton4 = QtWidgets.QPushButton("Best Value", self._buttonsWidget)
-        self._pushButton5 = QtWidgets.QPushButton("Find candidate", self._buttonsWidget)
-        self._pushButton6 = QtWidgets.QPushButton("Find tile", self._buttonsWidget)
-        self._pushButton7 = QtWidgets.QPushButton("Fast Render", self._buttonsWidget)
-        self._pushButton8 = QtWidgets.QPushButton("Full Render", self._buttonsWidget)
-        self._pushButton9 = QtWidgets.QPushButton("Save", self._buttonsWidget)
+        push_button0 = QtWidgets.QPushButton("Help Me!", buttons_widget)
+        push_button1 = QtWidgets.QPushButton("Place Tile!", buttons_widget)
+        push_button2 = QtWidgets.QPushButton("Undo", buttons_widget)
+        push_button3 = QtWidgets.QPushButton("Best Match", buttons_widget)
+        push_button4 = QtWidgets.QPushButton("Best Value", buttons_widget)
+        push_button5 = QtWidgets.QPushButton("Find candidate", buttons_widget)
+        push_button6 = QtWidgets.QPushButton("Find tile", buttons_widget)
+        push_button7 = QtWidgets.QPushButton("Fast Render", buttons_widget)
+        push_button8 = QtWidgets.QPushButton("Full Render", buttons_widget)
+        push_button9 = QtWidgets.QPushButton("Save", buttons_widget)
 
-        self._pushButton0.clicked.connect(self._help_me)
-        self._pushButton1.clicked.connect(self._place_tile)
-        self._pushButton2.clicked.connect(self._board.undo)
-        self._pushButton3.clicked.connect(self._place_best_match)
-        self._pushButton4.clicked.connect(self._place_best_value)
-        self._pushButton5.clicked.connect(self._find_candidate)
-        self._pushButton6.clicked.connect(self._find_tile)
-        self._pushButton7.clicked.connect(self._render_fast)
-        self._pushButton8.clicked.connect(self._board.render)
-        self._pushButton9.clicked.connect(self._board.save_data)
+        push_button0.clicked.connect(self._help_me)
+        push_button1.clicked.connect(self._place_tile)
+        push_button2.clicked.connect(self._board.undo)
+        push_button3.clicked.connect(self._place_best_match)
+        push_button4.clicked.connect(self._place_best_value)
+        push_button5.clicked.connect(self._find_candidate)
+        push_button6.clicked.connect(self._find_tile)
+        push_button7.clicked.connect(self._render_fast)
+        push_button8.clicked.connect(self._board.render)
+        push_button9.clicked.connect(self._board.save_data)
 
-        self._gridLayout.addWidget(self._pushButton0, 0, 0, 1, 1)
-        self._gridLayout.addWidget(self._pushButton1, 1, 0, 1, 1)
-        self._gridLayout.addWidget(self._pushButton2, 2, 0, 1, 1)
-        self._gridLayout.addWidget(self._pushButton3, 0, 1, 1, 1)
-        self._gridLayout.addWidget(self._pushButton4, 1, 1, 1, 1)
-        self._gridLayout.addWidget(self._pushButton5, 2, 1, 1, 1)
-        self._gridLayout.addWidget(self._pushButton6, 3, 1, 1, 1)
-        self._gridLayout.addWidget(self._pushButton7, 0, 2, 1, 1)
-        self._gridLayout.addWidget(self._pushButton8, 1, 2, 1, 1)
-        self._gridLayout.addWidget(self._pushButton9, 2, 2, 1, 1)
+        grid_layout.addWidget(push_button0, 0, 0, 1, 1)
+        grid_layout.addWidget(push_button1, 1, 0, 1, 1)
+        grid_layout.addWidget(push_button2, 2, 0, 1, 1)
+        grid_layout.addWidget(push_button3, 0, 1, 1, 1)
+        grid_layout.addWidget(push_button4, 1, 1, 1, 1)
+        grid_layout.addWidget(push_button5, 2, 1, 1, 1)
+        grid_layout.addWidget(push_button6, 3, 1, 1, 1)
+        grid_layout.addWidget(push_button7, 0, 2, 1, 1)
+        grid_layout.addWidget(push_button8, 1, 2, 1, 1)
+        grid_layout.addWidget(push_button9, 2, 2, 1, 1)
 
         # Rotation buttons
-        self.tileWidget = QtWidgets.QWidget(self)
-        self.tileWidget.setGeometry(150, 150, 150, 50)
-        self.gridLayout = QtWidgets.QGridLayout(self.tileWidget)
-        self.gridLayout.setContentsMargins(5, 5, 5, 5)
+        tile_widget = QtWidgets.QWidget(self)
+        tile_widget.setGeometry(150, 150, 150, 50)
+        grid_layout = QtWidgets.QGridLayout(tile_widget)
+        grid_layout.setContentsMargins(5, 5, 5, 5)
 
-        self.pushButtonL = QtWidgets.QPushButton(self.tileWidget)
-        self.pushButtonR = QtWidgets.QPushButton(self.tileWidget)
-        self.pushButtonL.setText("↻")
-        self.pushButtonR.setText("↺")
-        self.pushButtonL.clicked.connect(self._rotate_left)
-        self.pushButtonR.clicked.connect(self._rotate_right)
-        self.gridLayout.addWidget(self.pushButtonL, 0, 0, 1, 1)
-        self.gridLayout.addWidget(self.pushButtonR, 0, 1, 1, 1)
+        push_button_l = QtWidgets.QPushButton(tile_widget)
+        push_button_r = QtWidgets.QPushButton(tile_widget)
+        push_button_l.setText("↻")
+        push_button_r.setText("↺")
+        push_button_l.clicked.connect(self._rotate_left)
+        push_button_r.clicked.connect(self._rotate_right)
+        grid_layout.addWidget(push_button_l, 0, 0, 1, 1)
+        grid_layout.addWidget(push_button_r, 0, 1, 1, 1)
+
+        # Display area
+        display_widget = QtWidgets.QWidget(self)
+        display_widget.setGeometry(300, 0, 660, 360)
+
+        self.textDisplay = QtWidgets.QTextEdit()
+        self.textDisplay.setFont(QtGui.QFont("Consolas"))
+        self.textDisplay.setFontPointSize(10)
+        self.textDisplay.ensureCursorVisible()
+        self.textDisplay.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
+        self._cursor = self.textDisplay.textCursor()
+        self.textDisplay.setTextCursor(self._cursor)
+
+        v_box = QtWidgets.QVBoxLayout(display_widget)
+        h_box = QtWidgets.QHBoxLayout()
+        v_box.addLayout(h_box)
+        h_box.addWidget(self.textDisplay)
 
     def paintEvent(self, event):
         """Overriden function called automatically when initiating the widget and using repaint()."""
@@ -158,17 +176,23 @@ class Window(QMainWindow):
                 painter.drawPolygon(polygon)
                 painter.drawPolygon(polygon)
 
+    def _logger(self, string: str):
+        """Logs for python and Qt window."""
+        logger.info(string)
+        self._cursor.insertText(string + "\n")
+        self.textDisplay.moveCursor(QtGui.QTextCursor.End)
+
     def _validate_coord(self) -> bool:
         """Verify if the X and Y coordinates are valid."""
         try:
             int(self._x.text())
         except ValueError:
-            logger.warning("X must be an integer")
+            self._logger("X must be an integer")
             return False
         try:
             int(self._y.text())
         except ValueError:
-            logger.warning("Y must be an integer")
+            self._logger("Y must be an integer")
             return False
         return True
 
@@ -181,8 +205,7 @@ class Window(QMainWindow):
             except ValueError:
                 error = True
                 if logs:
-                    logger.warning(
-                        f"Edge {i_edge + 1}: '{getattr(self, '_e' + str(i_edge)).text()}' is not a valid edge")
+                    self._logger(f"Edge {i_edge + 1}: '{getattr(self, '_e' + str(i_edge)).text()}' is not a valid edge")
         if error:
             return False
         return True
@@ -194,21 +217,21 @@ class Window(QMainWindow):
         self.repaint()
 
         # Logging
-        logger.info("# " * 60)
+        self._logger("# " * 60)
 
         # Check if tile was seen before
         tile_occ = self._board.find_tile(
             [Tile.Edge(int(edge.text())) for edge in [self._e0, self._e1, self._e2, self._e3, self._e4, self._e5]]
         )
         if not tile_occ:
-            logger.info("New tile")
+            self._logger("New tile")
 
         # Displaying best values for each matches
         matches, five_of_six_matches = self._board.help_me(
             [Tile.Edge(int(edge.text())) for edge in [self._e0, self._e1, self._e2, self._e3, self._e4, self._e5]]
         )
         if not matches:
-            logger.info("Bruh")
+            self._logger("Bruh")
             return None, None
 
         result_table, neighbors_num = [], []
@@ -246,26 +269,27 @@ class Window(QMainWindow):
                     display += "\t|"
                 else:
                     display += "  " + match + "\t|"
-            logger.info(repr(display.expandtabs(30))[1:-1])
+            self._logger(repr(display.expandtabs(30))[1:-1])
+
         values = "-"
         for n in neighbors_num:
             values += " - - - - - - -" + str(n) + "- - - - - - - -"
-        logger.info(values)
+        self._logger(values)
 
         # Retrieving candidate with best value
         if len(matches) == 1 or matches[0].value != matches[1].value:
-            logger.info(f"BV: M:{matches[0].n_neighbors} V:{matches[0].value} {matches[0].tile.get_pos()}")
+            self._logger(f"BV: M:{matches[0].n_neighbors} V:{matches[0].value} {matches[0].tile.get_pos()}")
         self._best_value = matches[0].tile  # always have a BV, but no logs if draw
 
         # Retrieving candidate with best match
         matches.sort(key=lambda t: (-t.n_neighbors))
         if len(matches) == 1 or matches[0].n_neighbors != matches[1].n_neighbors:
-            logger.info(f"BM: M:{matches[0].n_neighbors} V:{matches[0].value} {matches[0].tile.get_pos()}")
+            self._logger(f"BM: M:{matches[0].n_neighbors} V:{matches[0].value} {matches[0].tile.get_pos()}")
         self._best_match = matches[0].tile  # always have a BM, but no logs if draw
 
         # 5/6 matches
         for match in five_of_six_matches:
-            logger.info(f"5/6 Match: {match.tile.get_pos()} | Ideal occurrence: {match.ideal_occurrence}")
+            self._logger(f"5/6 Match: {match.tile.get_pos()} | Ideal occurrence: {match.ideal_occurrence}")
 
     def _place_tile(self):
         if self._validate_coord() and self._validate_edges():
@@ -277,29 +301,29 @@ class Window(QMainWindow):
     def _place_best_match(self):
         if self._best_match:
             self._board.place_tile(self._best_match)
-            logger.info("Best Match placed")
+            self._logger("Best Match placed")
             self._reset_preview()
         else:
-            logger.info("No best tile retrieved")
+            self._logger("No best tile retrieved")
 
     def _place_best_value(self):
         if self._best_value:
             self._board.place_tile(self._best_value)
-            logger.info("Best Value placed")
+            self._logger("Best Value placed")
             self._reset_preview()
         else:
-            logger.info("No best tile retrieved")
+            self._logger("No best tile retrieved")
 
     def _find_candidate(self):
         if self._validate_edges():
             matches = self._board.find_candidate(
                 [Tile.Edge(int(edge.text())) for edge in [self._e0, self._e1, self._e2, self._e3, self._e4, self._e5]])
             if not matches:
-                logger.info("Candidate not found in database.")
+                self._logger("Candidate not found in database.")
             elif len(matches) < 11:
-                logger.info(f"Candidate found: {matches}.")
+                self._logger(f"Candidate found: {matches}.")
             else:
-                logger.info(f"Candidate found: {len(matches)} matches.")
+                self._logger(f"Candidate found: {len(matches)} matches.")
             self.update()
 
     def _find_tile(self):
@@ -307,11 +331,11 @@ class Window(QMainWindow):
             matches = self._board.find_tile(
                 [Tile.Edge(int(edge.text())) for edge in [self._e0, self._e1, self._e2, self._e3, self._e4, self._e5]])
             if not matches:
-                logger.info("Tile not found in database.")
+                self._logger("Tile not found in database.")
             elif len(matches) < 11:
-                logger.info(f"Tile found: {matches}.")
+                self._logger(f"Tile found: {matches}.")
             else:
-                logger.info(f"Tile found: {len(matches)} matches.")
+                self._logger(f"Tile found: {len(matches)} matches.")
             self.update()
 
     def _rotate_left(self):
