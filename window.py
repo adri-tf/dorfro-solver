@@ -7,7 +7,6 @@ from typing import Optional
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QMainWindow
 
 from board import Board, COLOR_MAPPING
 from tile import Tile
@@ -15,19 +14,11 @@ from tile import Tile
 logger = logging.getLogger("root")
 
 
-class Window(QMainWindow):
+class MainWidget(QtWidgets.QWidget):
     """Window."""
 
     def __init__(self, board: Board):
         super().__init__()
-
-        # Window settings
-        self.setWindowTitle("Dorfro-solver")
-        self.setWindowIcon(QtGui.QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.jpg")))
-        self._width, self._height = 960, 360
-        self.setMinimumSize(self._width - 300, self._height)
-        self.setMaximumSize(self._width, self._height)
-        self.setGeometry(int((1920 - self._width) / 2), 30, self._width, self._height)
 
         # Variables
         self._board: Board = board
@@ -35,43 +26,46 @@ class Window(QMainWindow):
         self._best_match: Optional[Tile] = None
         self._best_value: Optional[Tile] = None
 
+        # Window settings
+        width, height = 960, 360
+        self.setGeometry(int((1920 - width) / 2), 30, width, height)
+        self.setMinimumSize(450, 400)
+        self.setWindowTitle("Dorfro-solver")
+        self.setWindowIcon(QtGui.QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.jpg")))
+
         # Inputs
-        input_widget = QtWidgets.QWidget(self)
-        input_widget.setGeometry(0, 0, 150, 200)
-        input_form = QtWidgets.QFormLayout(input_widget)
-        input_form.setContentsMargins(5, 5, 5, 5)
+        input_form_widget = QtWidgets.QWidget()
+        input_form_layout = QtWidgets.QFormLayout(input_form_widget)
 
-        x_label, self._x = QtWidgets.QLabel("X", input_widget), QtWidgets.QLineEdit(input_widget)
-        y_label, self._y = QtWidgets.QLabel("Y", input_widget), QtWidgets.QLineEdit(input_widget)
-        e0_label, self._e0 = QtWidgets.QLabel("1", input_widget), QtWidgets.QLineEdit(input_widget)
-        e1_label, self._e1 = QtWidgets.QLabel("2", input_widget), QtWidgets.QLineEdit(input_widget)
-        e2_label, self._e2 = QtWidgets.QLabel("3", input_widget), QtWidgets.QLineEdit(input_widget)
-        e3_label, self._e3 = QtWidgets.QLabel("4", input_widget), QtWidgets.QLineEdit(input_widget)
-        e4_label, self._e4 = QtWidgets.QLabel("5", input_widget), QtWidgets.QLineEdit(input_widget)
-        e5_label, self._e5 = QtWidgets.QLabel("6", input_widget), QtWidgets.QLineEdit(input_widget)
+        x_label, self._x = QtWidgets.QLabel("X", input_form_widget), QtWidgets.QLineEdit(input_form_widget)
+        y_label, self._y = QtWidgets.QLabel("Y", input_form_widget), QtWidgets.QLineEdit(input_form_widget)
+        e0_label, self._e0 = QtWidgets.QLabel("1", input_form_widget), QtWidgets.QLineEdit(input_form_widget)
+        e1_label, self._e1 = QtWidgets.QLabel("2", input_form_widget), QtWidgets.QLineEdit(input_form_widget)
+        e2_label, self._e2 = QtWidgets.QLabel("3", input_form_widget), QtWidgets.QLineEdit(input_form_widget)
+        e3_label, self._e3 = QtWidgets.QLabel("4", input_form_widget), QtWidgets.QLineEdit(input_form_widget)
+        e4_label, self._e4 = QtWidgets.QLabel("5", input_form_widget), QtWidgets.QLineEdit(input_form_widget)
+        e5_label, self._e5 = QtWidgets.QLabel("6", input_form_widget), QtWidgets.QLineEdit(input_form_widget)
 
-        input_form.setWidget(0, QtWidgets.QFormLayout.LabelRole, x_label)
-        input_form.setWidget(0, QtWidgets.QFormLayout.FieldRole, self._x)
-        input_form.setWidget(1, QtWidgets.QFormLayout.LabelRole, y_label)
-        input_form.setWidget(1, QtWidgets.QFormLayout.FieldRole, self._y)
-        input_form.setWidget(2, QtWidgets.QFormLayout.LabelRole, e0_label)
-        input_form.setWidget(2, QtWidgets.QFormLayout.FieldRole, self._e0)
-        input_form.setWidget(3, QtWidgets.QFormLayout.LabelRole, e1_label)
-        input_form.setWidget(3, QtWidgets.QFormLayout.FieldRole, self._e1)
-        input_form.setWidget(4, QtWidgets.QFormLayout.LabelRole, e2_label)
-        input_form.setWidget(4, QtWidgets.QFormLayout.FieldRole, self._e2)
-        input_form.setWidget(5, QtWidgets.QFormLayout.LabelRole, e3_label)
-        input_form.setWidget(5, QtWidgets.QFormLayout.FieldRole, self._e3)
-        input_form.setWidget(6, QtWidgets.QFormLayout.LabelRole, e4_label)
-        input_form.setWidget(6, QtWidgets.QFormLayout.FieldRole, self._e4)
-        input_form.setWidget(7, QtWidgets.QFormLayout.LabelRole, e5_label)
-        input_form.setWidget(7, QtWidgets.QFormLayout.FieldRole, self._e5)
+        input_form_layout.setWidget(0, QtWidgets.QFormLayout.LabelRole, x_label)
+        input_form_layout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self._x)
+        input_form_layout.setWidget(1, QtWidgets.QFormLayout.LabelRole, y_label)
+        input_form_layout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self._y)
+        input_form_layout.setWidget(2, QtWidgets.QFormLayout.LabelRole, e0_label)
+        input_form_layout.setWidget(2, QtWidgets.QFormLayout.FieldRole, self._e0)
+        input_form_layout.setWidget(3, QtWidgets.QFormLayout.LabelRole, e1_label)
+        input_form_layout.setWidget(3, QtWidgets.QFormLayout.FieldRole, self._e1)
+        input_form_layout.setWidget(4, QtWidgets.QFormLayout.LabelRole, e2_label)
+        input_form_layout.setWidget(4, QtWidgets.QFormLayout.FieldRole, self._e2)
+        input_form_layout.setWidget(5, QtWidgets.QFormLayout.LabelRole, e3_label)
+        input_form_layout.setWidget(5, QtWidgets.QFormLayout.FieldRole, self._e3)
+        input_form_layout.setWidget(6, QtWidgets.QFormLayout.LabelRole, e4_label)
+        input_form_layout.setWidget(6, QtWidgets.QFormLayout.FieldRole, self._e4)
+        input_form_layout.setWidget(7, QtWidgets.QFormLayout.LabelRole, e5_label)
+        input_form_layout.setWidget(7, QtWidgets.QFormLayout.FieldRole, self._e5)
 
         # Buttons
-        buttons_widget = QtWidgets.QWidget(self)
-        buttons_widget.setGeometry(0, 200, 300, 160)
-        grid_layout = QtWidgets.QGridLayout(buttons_widget)
-        grid_layout.setContentsMargins(5, 5, 5, 5)
+        buttons_widget = QtWidgets.QWidget()
+        buttons_layout = QtWidgets.QGridLayout(buttons_widget)
 
         push_button0 = QtWidgets.QPushButton("Help Me!", buttons_widget)
         push_button1 = QtWidgets.QPushButton("Place Tile!", buttons_widget)
@@ -95,53 +89,65 @@ class Window(QMainWindow):
         push_button8.clicked.connect(self._board.render)
         push_button9.clicked.connect(self._board.save_data)
 
-        grid_layout.addWidget(push_button0, 0, 0, 1, 1)
-        grid_layout.addWidget(push_button1, 1, 0, 1, 1)
-        grid_layout.addWidget(push_button2, 2, 0, 1, 1)
-        grid_layout.addWidget(push_button3, 0, 1, 1, 1)
-        grid_layout.addWidget(push_button4, 1, 1, 1, 1)
-        grid_layout.addWidget(push_button5, 2, 1, 1, 1)
-        grid_layout.addWidget(push_button6, 3, 1, 1, 1)
-        grid_layout.addWidget(push_button7, 0, 2, 1, 1)
-        grid_layout.addWidget(push_button8, 1, 2, 1, 1)
-        grid_layout.addWidget(push_button9, 2, 2, 1, 1)
+        buttons_layout.addWidget(push_button0, 0, 0, 1, 1)
+        buttons_layout.addWidget(push_button1, 1, 0, 1, 1)
+        buttons_layout.addWidget(push_button2, 2, 0, 1, 1)
+        buttons_layout.addWidget(push_button3, 0, 1, 1, 1)
+        buttons_layout.addWidget(push_button4, 1, 1, 1, 1)
+        buttons_layout.addWidget(push_button5, 2, 1, 1, 1)
+        buttons_layout.addWidget(push_button6, 3, 1, 1, 1)
+        buttons_layout.addWidget(push_button7, 0, 2, 1, 1)
+        buttons_layout.addWidget(push_button8, 1, 2, 1, 1)
+        buttons_layout.addWidget(push_button9, 2, 2, 1, 1)
 
         # Rotation buttons
-        tile_widget = QtWidgets.QWidget(self)
-        tile_widget.setGeometry(150, 150, 150, 50)
-        grid_layout = QtWidgets.QGridLayout(tile_widget)
-        grid_layout.setContentsMargins(5, 5, 5, 5)
+        rot_buttons_widget = QtWidgets.QWidget()
+        rot_buttons_layout = QtWidgets.QGridLayout(rot_buttons_widget)
 
-        push_button_l = QtWidgets.QPushButton(tile_widget)
-        push_button_r = QtWidgets.QPushButton(tile_widget)
+        push_button_l = QtWidgets.QPushButton(rot_buttons_widget)
+        push_button_r = QtWidgets.QPushButton(rot_buttons_widget)
         push_button_l.setText("↻")
         push_button_r.setText("↺")
         push_button_l.clicked.connect(self._rotate_left)
         push_button_r.clicked.connect(self._rotate_right)
-        grid_layout.addWidget(push_button_l, 0, 0, 1, 1)
-        grid_layout.addWidget(push_button_r, 0, 1, 1, 1)
+        rot_buttons_layout.addWidget(push_button_l, 0, 0, 1, 1)
+        rot_buttons_layout.addWidget(push_button_r, 0, 1, 1, 1)
 
-        # Display area
-        display_widget = QtWidgets.QWidget(self)
+        # Display area (no layout)
+        display_widget = QtWidgets.QWidget()
         display_widget.setGeometry(300, 0, 660, 360)
 
-        self.textDisplay = QtWidgets.QTextEdit()
-        self.textDisplay.setFont(QtGui.QFont("Consolas"))
-        self.textDisplay.setFontPointSize(10)
-        self.textDisplay.ensureCursorVisible()
-        self.textDisplay.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
-        self._cursor = self.textDisplay.textCursor()
-        self.textDisplay.setTextCursor(self._cursor)
+        self._textDisplay = QtWidgets.QTextEdit()
+        self._textDisplay.setFont(QtGui.QFont("Consolas"))
+        self._textDisplay.setFontPointSize(10)
+        self._textDisplay.ensureCursorVisible()
+        self._textDisplay.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
+        self._cursor = self._textDisplay.textCursor()
+        self._textDisplay.setTextCursor(self._cursor)
 
-        v_box = QtWidgets.QVBoxLayout(display_widget)
-        h_box = QtWidgets.QHBoxLayout()
-        v_box.addLayout(h_box)
-        h_box.addWidget(self.textDisplay)
+        # Window arrangement
+        main_layout = QtWidgets.QHBoxLayout(self)  # |||
+        layout_1 = QtWidgets.QVBoxLayout()  # =
+        layout_11 = QtWidgets.QHBoxLayout()  # |||
+        layout_111 = QtWidgets.QVBoxLayout()  # =
+
+        layout_111.addStretch()
+        layout_111.addWidget(rot_buttons_widget)
+
+        layout_11.addWidget(input_form_widget)
+        layout_11.addLayout(layout_111)
+
+        layout_1.addLayout(layout_11)
+        layout_1.addWidget(buttons_widget)
+        layout_1.addStretch(1)
+
+        main_layout.addLayout(layout_1)
+        main_layout.addWidget(self._textDisplay, 1)
 
     def paintEvent(self, event):
         """Overriden function called automatically when initiating the widget and using repaint()."""
-        x = 225
-        y = 75
+        x = 267
+        y = 80
         w = 60
         hexagon_coord = [[x + w, y], [x + w * m.cos(-m.pi / 3), y + w * m.sin(-m.pi / 3)],
                          [x + w * m.cos(-m.pi * 2 / 3), y + w * m.sin(-m.pi * 2 / 3)], [x - w, y],
@@ -180,7 +186,7 @@ class Window(QMainWindow):
         """Logs for python and Qt window."""
         logger.info(string)
         self._cursor.insertText(string + "\n")
-        self.textDisplay.moveCursor(QtGui.QTextCursor.End)
+        self._textDisplay.moveCursor(QtGui.QTextCursor.End)
 
     def _validate_coord(self) -> bool:
         """Verify if the X and Y coordinates are valid."""
