@@ -36,11 +36,12 @@ class MainWidget(QtWidgets.QWidget):
         self._best_value: Optional[Tile] = None
 
         # Window settings
-        width, height = 960, 360
+        width, height = 1080, 360
         self.setGeometry(int((1920 - width) / 2), 30, width, height)
         self.setMinimumSize(450, 400)
         self.setWindowTitle("Dorfro-solver")
         self.setWindowIcon(QtGui.QIcon(os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.jpg")))
+        self.setStyleSheet("color: white; background-color: rgb(60, 63, 65);")
 
         # Inputs
         input_form_widget = QtWidgets.QWidget()
@@ -54,6 +55,15 @@ class MainWidget(QtWidgets.QWidget):
         e3_label, self._e3 = QtWidgets.QLabel("4", input_form_widget), QtWidgets.QLineEdit(input_form_widget)
         e4_label, self._e4 = QtWidgets.QLabel("5", input_form_widget), QtWidgets.QLineEdit(input_form_widget)
         e5_label, self._e5 = QtWidgets.QLabel("6", input_form_widget), QtWidgets.QLineEdit(input_form_widget)
+
+        self._x.setStyleSheet("background-color: rgb(69, 73, 74);")
+        self._y.setStyleSheet("background-color: rgb(69, 73, 74);")
+        self._e0.setStyleSheet(" background-color: rgb(69, 73, 74);")
+        self._e1.setStyleSheet(" background-color: rgb(69, 73, 74);")
+        self._e2.setStyleSheet(" background-color: rgb(69, 73, 74);")
+        self._e3.setStyleSheet(" background-color: rgb(69, 73, 74);")
+        self._e4.setStyleSheet(" background-color: rgb(69, 73, 74);")
+        self._e5.setStyleSheet(" background-color: rgb(69, 73, 74);")
 
         input_form_layout.setWidget(0, QtWidgets.QFormLayout.LabelRole, x_label)
         input_form_layout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self._x)
@@ -122,41 +132,29 @@ class MainWidget(QtWidgets.QWidget):
         rot_buttons_layout.addWidget(push_button_l, 0, 0, 1, 1)
         rot_buttons_layout.addWidget(push_button_r, 0, 1, 1, 1)
 
-        # Display area (no layout)
-        display_widget = QtWidgets.QWidget()
-        display_widget.setGeometry(300, 0, 660, 360)
-
-        self._textDisplay = QtWidgets.QTextEdit()
-        self._textDisplay.setFont(QtGui.QFont("Consolas"))
-        self._textDisplay.setFontPointSize(10)
-        self._textDisplay.ensureCursorVisible()
-        self._textDisplay.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
-        self._cursor = self._textDisplay.textCursor()
-        self._textDisplay.setTextCursor(self._cursor)
-
         # Window arrangement
-        main_layout = QtWidgets.QHBoxLayout(self)  # |||
+        main_layout = QtWidgets.QHBoxLayout(self)  # ||
         layout_1 = QtWidgets.QVBoxLayout()  # =
-        layout_11 = QtWidgets.QHBoxLayout()  # |||
-        layout_111 = QtWidgets.QVBoxLayout()  # =
-
-        layout_111.addStretch()
-        layout_111.addWidget(rot_buttons_widget)
-
-        layout_11.addWidget(input_form_widget)
-        layout_11.addLayout(layout_111)
+        layout_11 = QtWidgets.QHBoxLayout()  # ||
+        layout_112 = QtWidgets.QVBoxLayout()  # =
 
         layout_1.addLayout(layout_11)
         layout_1.addWidget(buttons_widget)
         layout_1.addStretch(1)
+
+        layout_11.addWidget(input_form_widget)
+        layout_11.addLayout(layout_112)
+
+        layout_112.addStretch()
+        layout_112.addWidget(rot_buttons_widget)
 
         main_layout.addLayout(layout_1)
         main_layout.addWidget(self._textDisplay, 1)
 
     def paintEvent(self, event):
         """Overriden function called automatically when initiating the widget and using repaint()."""
-        x = 267
-        y = 80
+        x = 247
+        y = 100
         w = 60
         hexagon_coord = [[x + w, y], [x + w * m.cos(-m.pi / 3), y + w * m.sin(-m.pi / 3)],
                          [x + w * m.cos(-m.pi * 2 / 3), y + w * m.sin(-m.pi * 2 / 3)], [x - w, y],
@@ -164,7 +162,7 @@ class MainWidget(QtWidgets.QWidget):
                          [x + w * m.cos(m.pi / 3), y + w * m.sin(m.pi / 3)], [x + w, y]]
 
         painter = QtGui.QPainter(self)
-        painter.setPen(QtGui.QPen(Qt.white, 2, Qt.SolidLine))
+        painter.setPen(QtGui.QPen(Qt.lightGray, 2, Qt.SolidLine))
         if self._validate_edges(logs=False):
             for i in range(6):
                 painter.setBrush(
@@ -231,16 +229,6 @@ class MainWidget(QtWidgets.QWidget):
             return
         self.repaint()
 
-        # Logging
-        self._logger("# " * 60)
-
-        # Check if tile was seen before
-        tile_occ = self._board.find_tile(
-            [Tile.Edge(int(edge.text())) for edge in [self._e0, self._e1, self._e2, self._e3, self._e4, self._e5]]
-        )
-        if not tile_occ:
-            self._logger("New tile")
-
         # Displaying best values for each matches
         matches, five_of_six_matches = self._board.help_me(
             [Tile.Edge(int(edge.text())) for edge in [self._e0, self._e1, self._e2, self._e3, self._e4, self._e5]]
@@ -273,10 +261,13 @@ class MainWidget(QtWidgets.QWidget):
         for line in result_table:
             line += [''] * (results_length - len(line))
 
+        self._logger("#" * (30 * len(result_table) + 1))
+
         # Transpose the table
         result_table = [
             [result_table[j][i] for j in range(len(result_table))] for i in range(len(result_table[0]) - 1, -1, -1)
         ]
+
         for line in result_table:
             display = "|"
             for match in line:
@@ -305,6 +296,13 @@ class MainWidget(QtWidgets.QWidget):
         # 5/6 matches
         for match in five_of_six_matches:
             self._logger(f"5/6 Match: {match.tile.get_pos()} | Ideal occurrence: {match.ideal_occurrence}")
+
+        # Check if tile was seen before
+        tile_occ = self._board.find_tile(
+            [Tile.Edge(int(edge.text())) for edge in [self._e0, self._e1, self._e2, self._e3, self._e4, self._e5]]
+        )
+        if not tile_occ:
+            self._logger("New tile")
 
     def _place_tile(self):
         if self._validate_coord() and self._validate_edges():
