@@ -5,7 +5,6 @@ import sys
 
 from PyQt5.QtWidgets import QApplication
 
-from board import Board
 from window import MainWidget
 
 logging.config.fileConfig(os.path.join(os.path.dirname(os.path.abspath(__file__)), "logging.conf"))
@@ -13,10 +12,9 @@ logging.config.fileConfig(os.path.join(os.path.dirname(os.path.abspath(__file__)
 
 def main():
     """Main function."""
-    board = Board()
-
     app = QApplication(sys.argv)
-    win = MainWidget(board)
+    app.setStyle('Fusion')
+    win = MainWidget()
     win.show()
     sys.exit(app.exec_())
 

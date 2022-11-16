@@ -1,10 +1,9 @@
 """Board class."""
-import logging
 import math as m
 import os
 import sys
 import time
-from typing import List, Optional, NamedTuple, Dict
+from typing import List, Optional, NamedTuple, Dict, Callable
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.axisartist import Axes
@@ -12,8 +11,6 @@ from mpl_toolkits.axisartist.grid_finder import MaxNLocator
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 
 from database import Database, Tile, NEIGHBORS_COORD
-
-logger = logging.getLogger("root")
 
 DATA_FILE_NAME = 'DATA.csv'
 
@@ -44,10 +41,11 @@ EDGE_VALUE: Dict[Tile.Edge, int] = {
 class Board:
     """Factory ensuring the database coherence given the Dorfromantik rules."""
 
-    def __init__(self):
+    def __init__(self, logger: Callable):
+        self._logger = logger
         self._database: Database = Database()
         nb_tiles, avg_x, avg_y = 0, 0, 0
-        logger.info("Loading Database...")
+        self._logger("Loading Database...")
         with open(os.path.join(os.path.dirname(sys.argv[0]), DATA_FILE_NAME)) as file:
             for line in file:
                 x, y, e0, e1, e2, e3, e4, e5 = [int(n) for n in line.split(';')]
@@ -56,7 +54,7 @@ class Board:
                     avg_x += x
                     avg_y += y
                     nb_tiles += 1
-        logger.info(f"Database loaded: {nb_tiles} tiles found.")
+        self._logger(f"Database loaded: {nb_tiles} tiles found.")
         self.m_x, self.m_y = avg_x / nb_tiles, avg_y / nb_tiles
         self.last_placement: Optional[Tile] = None
 
@@ -88,7 +86,7 @@ class Board:
         )
         plt.figure(figsize=[x_range, y_range]).add_subplot(1, 1, 1, axes_class=Axes, grid_helper=grid_helper).grid()
 
-        logger.info("Rendering board...")
+        self._logger("Rendering board...")
         s = 0.5 / m.cos(m.pi / 6) - 2 * 0.01  # 0.01 is the width of the triangles' lines (probably)
         for tile in self._database.get_tiles():
             x, y = self._tr(*tile.get_pos())
@@ -119,7 +117,7 @@ class Board:
         plt.savefig(os.path.join(os.path.dirname(sys.argv[0]), 'board.png'))
         plt.close()
         t1 = time.time()
-        logger.info(f"Board rendered | Time: {(t1 - t0):.2f}s.")
+        self._logger(f"Board rendered | Time: {(t1 - t0):.2f}s.")
 
     def place_tile(self, new_tile: Tile, show: bool = True) -> Tile:
         """Add a tile to the board if allowed.
@@ -146,33 +144,33 @@ class Board:
             elif show and n_tile.state == Tile.State.FULL and not self._edge_match(
                     getattr(new_tile, 'e' + str(i)), getattr(n_tile, 'e' + str((i + 3) % 6))
             ):
-                logger.warning(f"Edge {i + 1} with {n_coord} does not match")
+                self._logger(f"Edge {i + 1} with {n_coord} does not match")
         db_tile = self._database.get_tile(*new_tile.get_pos())
         db_tile.e0, db_tile.e1, db_tile.e2, db_tile.e3, db_tile.e4, db_tile.e5 = new_tile.get_edges()
         db_tile.state = Tile.State.FULL
         self.last_placement = new_tile
         if show:
-            logger.info(f"Tile {new_tile.get_pos()} placed")
+            self._logger(f"Tile {new_tile.get_pos()} placed")
             # Verify if neighbors are closed slots with no candidates seen before
             for n in [tile for tile in db_tile.get_neighbors() if tile.state == Tile.State.EMPTY]:
                 if len([t for t in n.get_neighbors() if t is not None and t.state == Tile.State.FULL]) == 6:
                     n_c = self.find_candidate([getattr(n.get_neighbors()[j], 'e' + str((j + 3) % 6)) for j in range(6)])
                     if not n_c:
-                        logger.warning(f"Warning: {n.get_pos()} closed but candidates found")
+                        self._logger(f"Warning: {n.get_pos()} closed but candidates found")
                     else:
-                        logger.info(f"{n.get_pos()} closed, {len(n_c)} candidates found")
+                        self._logger(f"{n.get_pos()} closed, {len(n_c)} candidates found")
         return db_tile
 
     def undo(self):
         """Delete last tile placement."""
         if not self.last_placement:
-            logger.warning("No last placement")
+            self._logger("No last placement")
             return
         x, y = self.last_placement.get_pos()
         self._database.remove_tile(x, y)
         self._database.add_tile(Tile(x, y))
         self.last_placement = None
-        logger.info(f"Last tile ({x, y}) removed from board")
+        self._logger(f"Last tile ({x, y}) removed from board")
 
     def save_data(self):
         """Save all tiles in a file."""
@@ -181,7 +179,7 @@ class Board:
             for tile in tiles:
                 line = f"{tile.x};{tile.y};{tile.e0};{tile.e1};{tile.e2};{tile.e3};{tile.e4};{tile.e5}\n"
                 file.write(line)
-        logger.info(f"{len(tiles)} tiles saved successfully")
+        self._logger(f"{len(tiles)} tiles saved successfully")
 
     def help_me(self, edges: List[Tile.Edge]) -> (list, list):
         """The core of the added value. It only considers empty slots with at least 2 neighbors fulfilled.

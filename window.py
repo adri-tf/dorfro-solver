@@ -17,11 +17,20 @@ logger = logging.getLogger("root")
 class MainWidget(QtWidgets.QWidget):
     """Window."""
 
-    def __init__(self, board: Board):
+    def __init__(self):
         super().__init__()
 
+        # Text display (declared now for board logs)
+        self._textDisplay = QtWidgets.QTextEdit()
+        self._textDisplay.ensureCursorVisible()
+        self._textDisplay.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
+        self._cursor = self._textDisplay.textCursor()
+        self._textDisplay.setTextCursor(self._cursor)
+        self._textDisplay.setReadOnly(True)
+        self._textDisplay.setStyleSheet("background-color: rgb(43, 43, 43); font-family: Consolas; font-size: 15px;")
+
         # Variables
-        self._board: Board = board
+        self._board = Board(self._logger)
         self._rotations = 0
         self._best_match: Optional[Tile] = None
         self._best_value: Optional[Tile] = None
