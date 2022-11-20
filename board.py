@@ -146,7 +146,8 @@ class Board:
             ):
                 self._logger(f"Edge {i + 1} with {n_coord} does not match")
         db_tile = self._database.get_tile(*new_tile.get_pos())
-        db_tile.e0, db_tile.e1, db_tile.e2, db_tile.e3, db_tile.e4, db_tile.e5 = new_tile.get_edges()
+        db_tile.e0, db_tile.e1, db_tile.e2, db_tile.e3, db_tile.e4, db_tile.e5 = [Tile.Edge(e) for e in
+                                                                                  new_tile.get_edges()]
         db_tile.state = Tile.State.FULL
         self.last_placement = new_tile
         if show:
@@ -212,16 +213,18 @@ class Board:
                 continue
             # For each rotation of the tile to place
             for i in range(self._rotations(edges)):
-                candidate: Tile = Tile(slot.x, slot.y, edges[i:] + edges[:i])
+                candidate = Tile(slot.x, slot.y, edges[i:] + edges[:i])
                 candidate_value = 0
                 conflicts = 0
                 for j, slot_n in enumerate(slot.get_neighbors()):
                     if slot_n and slot_n.state == Tile.State.FULL:
-                        if not self._edge_match(
-                                getattr(candidate, 'e' + str(j)), getattr(slot_n, 'e' + str((j + 3) % 6))
-                        ):
+                        c_e, s_e = getattr(candidate, 'e' + str(j)), getattr(slot_n, 'e' + str((j + 3) % 6))
+                        if not self._edge_match(c_e, s_e):
                             conflicts += 1
                             if conflicts > 1:
+                                break
+                            if not self._edge_compatible(c_e, s_e):
+                                conflicts = 6  # 2 would work too, as long as it denies the 5/6 conditions
                                 break
                         # What is matched (from the existing tile and from the candidate)
                         candidate_value += EDGE_VALUE[getattr(slot_n, 'e' + str((j + 3) % 6))]
@@ -293,6 +296,24 @@ class Board:
         if e2 == Tile.Edge.DOME and e1 in [Tile.Edge.PLAIN, Tile.Edge.RIVER, Tile.Edge.RAIL, Tile.Edge.POND]:
             return True
         return False
+
+    @staticmethod
+    def _edge_compatible(e1: Tile.Edge, e2: Tile.Edge) -> bool:
+        """Verify if edges are compatibles.
+
+        :return: boolean.
+        """
+        if e1 == e2:
+            return True
+        if e1 == Tile.Edge.RIVER and e2 not in [Tile.Edge.POND, Tile.Edge.DOME]:
+            return False
+        if e1 == Tile.Edge.RAIL and e2 not in [Tile.Edge.DOME]:
+            return False
+        if e2 == Tile.Edge.RIVER and e1 not in [Tile.Edge.POND, Tile.Edge.DOME]:
+            return False
+        if e2 == Tile.Edge.RAIL and e1 not in [Tile.Edge.DOME]:
+            return False
+        return True
 
     @staticmethod
     def _rotations(edges: List[Tile.Edge]) -> int:

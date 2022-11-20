@@ -282,6 +282,10 @@ class MainWidget(QtWidgets.QWidget):
             values += " - - - - - - -" + str(n) + "- - - - - - - -"
         self._logger(values)
 
+        # 5/6 matches
+        for match in five_of_six_matches:
+            self._logger(f"5/6 Match: {match.tile.get_pos()} | Ideal occurrence: {match.ideal_occurrence}")
+
         # Retrieving candidate with best value
         if len(matches) == 1 or matches[0].value != matches[1].value:
             self._logger(f"BV: M:{matches[0].n_neighbors} V:{matches[0].value} {matches[0].tile.get_pos()}")
@@ -289,13 +293,10 @@ class MainWidget(QtWidgets.QWidget):
 
         # Retrieving candidate with best match
         matches.sort(key=lambda t: (-t.n_neighbors))
-        if len(matches) == 1 or matches[0].n_neighbors != matches[1].n_neighbors:
+        if len(matches) == 1 or (matches[0].n_neighbors != matches[1].n_neighbors and
+                                 matches[0].value != matches[1].value):
             self._logger(f"BM: M:{matches[0].n_neighbors} V:{matches[0].value} {matches[0].tile.get_pos()}")
         self._best_match = matches[0].tile  # always have a BM, but no logs if draw
-
-        # 5/6 matches
-        for match in five_of_six_matches:
-            self._logger(f"5/6 Match: {match.tile.get_pos()} | Ideal occurrence: {match.ideal_occurrence}")
 
         # Check if tile was seen before
         tile_occ = self._board.find_tile(
