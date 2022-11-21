@@ -235,7 +235,7 @@ class MainWidget(QtWidgets.QWidget):
         )
         if not matches:
             self._logger("Bruh")
-            return None, None
+            return
 
         result_table, neighbors_num = [], []
         matches.sort(key=lambda t: (-t.value, t.distance))  # sort by value (descending) then distance
@@ -293,8 +293,7 @@ class MainWidget(QtWidgets.QWidget):
 
         # Retrieving candidate with best match
         matches.sort(key=lambda t: (-t.n_neighbors))
-        if len(matches) == 1 or (matches[0].n_neighbors != matches[1].n_neighbors and
-                                 matches[0].value != matches[1].value):
+        if len(matches) == 1 or matches[0].value != matches[1].value:
             self._logger(f"BM: M:{matches[0].n_neighbors} V:{matches[0].value} {matches[0].tile.get_pos()}")
         self._best_match = matches[0].tile  # always have a BM, but no logs if draw
 
