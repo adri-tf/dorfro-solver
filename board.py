@@ -119,7 +119,11 @@ class Board:
                     plt.fill(xs, ys, color=COLOR_MAPPING[getattr(tile, 'e' + str(i))])
             plt.text(x, y, f"{tile.get_pos()}", color="white", ha='center', va='center')
 
-        plt.savefig(os.path.join(os.path.dirname(sys.argv[0]), 'board.png'))
+        img_title = "board.png"
+        if fast_mode:
+            img_title = "board_fast.png"
+        plt.savefig(os.path.join(os.path.dirname(sys.argv[0]), img_title))
+
         plt.close()
         t1 = time.time()
         self._logger(f"Board rendered | Time: {(t1 - t0):.2f}s.")
