@@ -4,9 +4,9 @@ Dorfromantik tool to optimize tile placement
 
 ![Alt text](board.png?raw=true)
 
-Fast render of the board created (3500 tiles)
+Fast render of the board created (3500 tiles entered manually)
 
-## How it works
+## Installation and Usage
 
 Python 3.10.X: https://www.python.org/downloads/
 
@@ -21,6 +21,7 @@ A window allow you to input the tile you desire
 In this example, the "Help Me!" button was pressed and the best placements are displayed on the right.
 
 ## Features:
+
 - Help Me!: Gives you all the details you want to figure out the best placement
 - Place Tile: X and Y must be fulfilled. Coordinates of each tile are displayed in the board.png file
 - Best Match (BM): places automatically the tile with the most matches
