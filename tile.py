@@ -29,6 +29,18 @@ class Tile:
 
         self.state: Tile.State = Tile.State.EMPTY
 
+        #         _____
+        #        /     \
+        #   ,---<   1   >---.
+        #  /     \_____/     \
+        #  \  2  /     \  0  /
+        #   >---<       >---<
+        #  /     \_____/     \
+        #  \  3  /     \  5  /
+        #   `---<   4   >---'
+        #        \_____/
+
+        # Neighbours
         self.n0: Optional['Tile'] = None
         self.n1: Optional['Tile'] = None
         self.n2: Optional['Tile'] = None
@@ -36,6 +48,7 @@ class Tile:
         self.n4: Optional['Tile'] = None
         self.n5: Optional['Tile'] = None
 
+        # Edges
         if edges:
             if len(edges) != 6:
                 raise Exception("Cannot initialize Tile: assign all 6 edges or none")

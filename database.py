@@ -19,41 +19,38 @@ class Database:
     def __init__(self):
         self._tiles: List[Tile] = [Tile(0, 0)]
 
-    def add_tile(self, tile: Tile) -> bool:
+    def add_tile(self, tile: Tile) -> None:
         """Add a tile to the database.
 
-        :param tile:
+        :param tile: tile to add.
         :raise Exception: tile already created.
         """
         for db_tile in self._tiles:
-            if tile.x == db_tile.x and tile.y == db_tile.y:
-                # raise Exception(f"Cannot add tile {tile.x, tile.y}: slot already created.")
-                return False
+            if tile.get_pos() == db_tile.get_pos():
+                raise Exception(f"Cannot add tile {tile.get_pos()}: slot already created.")
 
-        # For each neighbour of the tile
+        # Update neighbors
         for i in range(6):
             neighbor = self.get_tile(tile.x + NEIGHBORS_COORD[i]["x"], tile.y + NEIGHBORS_COORD[i]["y"])
             if neighbor:
-                # Set the link between neighbor and tile
                 setattr(neighbor, "n" + str((i + 3) % 6), tile)
                 setattr(tile, "n" + str(i), neighbor)
             del neighbor
 
         self._tiles += [tile]
-        return True
 
-    def remove_tile(self, x: int, y: int) -> bool:
+    def remove_tile(self, x: int, y: int) -> None:
         """Remove a tile from database, if present.
 
         :param x: x coordinate.
         :param y: y coordinate
-        :return: True if deleted, False otherwise.
+        :raise Exception: tile not found.
         """
         for db_tile in self._tiles:
-            if x == db_tile.x and y == db_tile.y:
+            if db_tile.get_pos() == (x, y):
                 self._tiles.remove(db_tile)
-                return True
-        return False
+                return
+        raise Exception(f"Tile {x, y} not found")
 
     def get_tile(self, x: int, y: int) -> Optional[Tile]:
         """Retrieve a tile by its coordinates.

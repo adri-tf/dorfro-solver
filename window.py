@@ -20,7 +20,7 @@ class MainWidget(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
-        # Text display (declared now for board logs)
+        # Text display (declared first for logs)
         self._textDisplay = QtWidgets.QTextEdit()
         self._textDisplay.ensureCursorVisible()
         self._textDisplay.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
@@ -152,10 +152,8 @@ class MainWidget(QtWidgets.QWidget):
         main_layout.addWidget(self._textDisplay, 1)
 
     def paintEvent(self, event):
-        """Overriden function called automatically when initiating the widget and using repaint()."""
-        x = 247
-        y = 100
-        w = 60
+        """Overridden function called automatically when initiating the widget and using repaint()."""
+        x, y, w = 247, 100, 60  # coordinates of center and width of the hexagon display
         hexagon_coord = [[x + w, y], [x + w * m.cos(-m.pi / 3), y + w * m.sin(-m.pi / 3)],
                          [x + w * m.cos(-m.pi * 2 / 3), y + w * m.sin(-m.pi * 2 / 3)], [x - w, y],
                          [x + w * m.cos(m.pi * 2 / 3), y + w * m.sin(m.pi * 2 / 3)],
@@ -167,30 +165,28 @@ class MainWidget(QtWidgets.QWidget):
             for i in range(6):
                 painter.setBrush(
                     QtGui.QBrush(QColor(COLOR_MAPPING[Tile.Edge(int(getattr(self, '_e' + str(i)).text()))]),
-                                 Qt.SolidPattern))
+                                 Qt.SolidPattern)
+                )
                 polygon = QtGui.QPolygon([
                     QtCore.QPoint(x, y),
                     QtCore.QPoint(int(hexagon_coord[i][0]), int(hexagon_coord[i][1])),
                     QtCore.QPoint(int(hexagon_coord[i + 1][0]), int(hexagon_coord[i + 1][1])),
                 ])
 
-                painter.drawPolygon(polygon)
                 painter.drawPolygon(polygon)
         else:
+            painter.setBrush(QtGui.QBrush(Qt.white, Qt.SolidPattern))
             for i in range(6):
-                painter.setBrush(QtGui.QBrush(Qt.white, Qt.SolidPattern))
-
                 polygon = QtGui.QPolygon([
                     QtCore.QPoint(x, y),
                     QtCore.QPoint(int(hexagon_coord[i][0]), int(hexagon_coord[i][1])),
                     QtCore.QPoint(int(hexagon_coord[i + 1][0]), int(hexagon_coord[i + 1][1])),
                 ])
 
-                painter.drawPolygon(polygon)
                 painter.drawPolygon(polygon)
 
     def _logger(self, string: str):
-        """Logs for python and Qt window."""
+        """Logs for logging lib and Qt window."""
         logger.info(string)
         self._cursor.insertText(string + "\n")
         self._textDisplay.moveCursor(QtGui.QTextCursor.End)
@@ -224,12 +220,12 @@ class MainWidget(QtWidgets.QWidget):
         return True
 
     def _help_me(self):
+        """The core of the added value."""
         self._reset_preview()
         if not self._validate_edges():
             return
         self.repaint()
 
-        # Displaying best values for each matches
         matches, five_of_six_matches = self._board.help_me(
             [Tile.Edge(int(edge.text())) for edge in [self._e0, self._e1, self._e2, self._e3, self._e4, self._e5]]
         )
@@ -237,6 +233,7 @@ class MainWidget(QtWidgets.QWidget):
             self._logger("Bruh")
             return
 
+        # Displaying best values for each matches
         result_table, neighbors_num = [], []
         matches.sort(key=lambda t: (-t.value, t.distance))  # sort by value (descending) then distance
         for n_m in range(7, 1, -1):
