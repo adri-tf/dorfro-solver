@@ -2,7 +2,7 @@
 
 Dorfromantik tool to optimize tile placement
 
-![Alt text](board.png?raw=true)
+![Alt text](board_fast.png?raw=true)
 
 Fast render of the board created (3500 tiles entered manually)
 
