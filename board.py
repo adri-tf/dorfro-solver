@@ -84,7 +84,12 @@ class Board:
         grid_helper = GridHelperCurveLinear(
             (self._tr, self._inv_tr), grid_locator1=MaxNLocator(integer=True), grid_locator2=MaxNLocator(integer=True)
         )
-        plt.figure(figsize=[x_range, y_range]).add_subplot(1, 1, 1, axes_class=Axes, grid_helper=grid_helper).grid()
+        fig = plt.figure(figsize=[x_range, y_range])
+        fig.add_subplot(1, 1, 1, axes_class=Axes, grid_helper=grid_helper).grid()
+        fig.set_facecolor("black")
+        fig.tight_layout()
+        ax = plt.axes()
+        ax.set_facecolor("black")
 
         self._logger("Rendering board...")
         s = 0.5 / m.cos(m.pi / 6) - 2 * 0.01  # 0.01 is the width of the triangles' lines (probably)
@@ -112,7 +117,7 @@ class Board:
                 elif tile.state == Tile.State.FULL:
                     getattr(tile, 'e' + str(i))
                     plt.fill(xs, ys, color=COLOR_MAPPING[getattr(tile, 'e' + str(i))])
-            plt.text(x, y, f"{tile.get_pos()}", ha='center', va='center')
+            plt.text(x, y, f"{tile.get_pos()}", color="white", ha='center', va='center')
 
         plt.savefig(os.path.join(os.path.dirname(sys.argv[0]), 'board.png'))
         plt.close()
