@@ -16,7 +16,7 @@ Launch with: `py dofro-solver.py`
 
 A window allow you to input the tile you desire
 
-![Alt text](windows.png?raw=true)
+![Alt text](window.png?raw=true)
 
 In this example, the "Help Me!" button was pressed and the best placements are displayed on the right.
 
