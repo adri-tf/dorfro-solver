@@ -2,7 +2,7 @@
 
 Dorfromantik tool to optimize tile placement
 
-![image info](board.png)
+![Alt text](board.png?raw=true)
 
 Fast render of the board created (3500 tiles)
 
@@ -16,7 +16,7 @@ Launch with: `py dofro-solver.py`
 
 A window allow you to input the tile you desire
 
-![image info](window.png)
+![Alt text](windows.png?raw=true)
 
 In this example, the "Help Me!" button was pressed and the best placements are displayed on the right.
 
