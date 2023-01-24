@@ -211,15 +211,15 @@ class MainWidget(QtWidgets.QWidget):
 
     def _validate_edges(self, logs: bool = True) -> bool:
         """Verify if all 6 edges are valid."""
-        error = False
+        invalid_edges = []
         for i_edge in range(6):
             try:
                 Tile.Edge(int(getattr(self, '_e' + str(i_edge)).text()))
             except ValueError:
-                error = True
-                if logs:
-                    self._logger(f"Edge {i_edge + 1}: '{getattr(self, '_e' + str(i_edge)).text()}' is not a valid edge")
-        if error:
+                invalid_edges.append(i_edge)
+        if invalid_edges:
+            if logs:
+                self._logger(f"Edge(s) {[i + 1 for i in invalid_edges]} not valid")
             return False
         return True
 
